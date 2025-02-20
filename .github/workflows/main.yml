@@ -30,7 +30,8 @@ jobs:
           java-version: '21'
           cache: maven
 
-      # Build and Run All Tests Except the Failure One
+      # Build and Run All Tests
       - name: Build and Run Success Test
+        working-directory: ./health-check
         run: |
           mvn clean test
