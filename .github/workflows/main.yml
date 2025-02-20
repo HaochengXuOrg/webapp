@@ -8,6 +8,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     services:
       mysql:
@@ -15,8 +16,6 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: 2001050926
           MYSQL_DATABASE: health_check_db
-          MYSQL_USER: root
-          MYSQL_PASSWORD: 2001050926
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
@@ -28,21 +27,13 @@ jobs:
       - name: Set up JDK 21
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
+          distribution: 'zulu'
           java-version: '21'
           cache: maven
+          cache-dependency-path: ./health-check/pom.xml
 
-      # Build and Run All Tests Except the Failure One
+      # Build and Run All Tests
       - name: Build and Run Success Test
+        working-directory: ./health-check
         run: |
-          mvn clean test -Dtest=HealthCheckApplicationTests#testHealthCheckSuccess
-
-      # Stop MySQL Service to Simulate Failure
-      - name: Stop MySQL (Simulate Failure)
-        run: |
-          sudo systemctl stop mysql || docker stop $(docker ps -q --filter ancestor=mysql:8.0) || true
-
-      # Run Failure Test to Get 503
-      - name: Run Failure Test
-        run: |
-          mvn test -Dtest=HealthCheckApplicationTests#testHealthCheckFailure
+          mvn clean test
