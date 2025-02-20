@@ -33,15 +33,4 @@ jobs:
       # Build and Run All Tests Except the Failure One
       - name: Build and Run Success Test
         run: |
-          mvn clean test -Dtest=HealthCheckApplicationTests#testHealthCheckSuccess
-
-      # Stop MySQL Service to Simulate Failure
-      - name: Stop MySQL (Simulate Failure)
-        run: |
-          sudo systemctl stop mysql || docker stop $(docker ps -q --filter ancestor=mysql:8.0) || true
-
-      # Run Failure Test to Get 503
-      - name: Run Failure Test
-        working-directory: ./health-check
-        run: |
-          mvn test -Dtest=HealthCheckApplicationTests#testHealthCheckFailure
+          mvn clean test
