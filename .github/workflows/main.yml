@@ -42,5 +42,6 @@ jobs:
 
       # Run Failure Test to Get 503
       - name: Run Failure Test
+        working-directory: ./health-check
         run: |
           mvn test -Dtest=HealthCheckApplicationTests#testHealthCheckFailure
