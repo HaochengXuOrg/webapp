@@ -24,7 +24,7 @@ class HealthCheckApplicationTests {
 				.when()
 				.get("/healthz")
 				.then()
-				.statusCode(200)
+				.statusCode(201)
 				.header("Cache-Control", containsString("no-cache"))
 				.header("Pragma", "no-cache")
 				.header("X-Content-Type-Options", "nosniff")
