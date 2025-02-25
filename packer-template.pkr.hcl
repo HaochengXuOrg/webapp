@@ -81,10 +81,10 @@ source "amazon-ebs" "aws_image" {
 
 # GCP Builder
 source "googlecompute" "gcp_image" {
-  project_id          = var.gcp_project_id
-  source_image        = "projects/csye6225-dev-452002/global/machineImages/my-machine-image"
-  zone                = var.gcp_zone
-  machine_type        = var.gcp_machine_type
+  project_id   = var.gcp_project_id
+  source_image = "projects/csye6225-dev-452002/global/machineImages/my-machine-image"
+  zone         = var.gcp_zone
+  machine_type = var.gcp_machine_type
 
   image_name              = "csye6225-custom-ubuntu-24-04-{{timestamp}}"
   image_family            = "csye6225-ubuntu-24-04"
