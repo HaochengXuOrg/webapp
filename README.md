@@ -1,6 +1,6 @@
 # webapp
 
-## Prerequisites for    Building and Deploying Locally
+## Prerequisites for Building and Deploying Locally
 
 Before building and deploying the application locally, ensure the following dependencies are installed.
 
