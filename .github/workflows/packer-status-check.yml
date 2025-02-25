@@ -1,0 +1,51 @@
+# .github/workflows/packer-status-check.yml
+
+name: Packer Status Check
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  packer-check:
+    name: Run Packer Format and Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Install Packer
+      - name: Install Packer
+        uses: hashicorp/setup-packer@main
+        with:
+          version: 1.12.0
+
+      # Initialize Pakcer
+      - name: Initialize Packer
+        run: packer init .
+
+      # Run `packer fmt` and fail if formatting changes are made
+      - name: Run Packer Format Check
+        run: |
+          if packer fmt -check -diff .; then
+            echo "Packer format check passed."
+          else
+            echo "Packer format check failed. Please run 'packer fmt' locally to fix formatting issues."
+            exit 1
+          fi
+
+      # Validate the Packer template
+      - name: Run Packer Validate
+        run: |
+          if packer validate .; then
+            echo "Packer validation passed."
+          else
+            echo "Packer validation failed. Please fix the template before merging."
+            exit 1
+          fi
