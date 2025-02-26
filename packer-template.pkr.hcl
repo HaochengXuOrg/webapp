@@ -82,7 +82,7 @@ source "amazon-ebs" "aws_image" {
 # GCP Builder
 source "googlecompute" "gcp_image" {
   project_id   = var.gcp_project_id
-  source_image = "projects/csye6225-dev-452002/global/machineImages/my-machine-image"
+  source_image = "ubuntu-2404-noble-amd64-v20250214"
   zone         = var.gcp_zone
   machine_type = var.gcp_machine_type
 
@@ -112,11 +112,71 @@ build {
 
   provisioner "shell" {
     inline = [
+      "sudo groupadd csye6225 || true",
+      "sudo useradd -g csye6225 -s /usr/sbin/nologin csye6225 || true",
       "sudo apt update -y",
       "sudo apt upgrade -y",
+      "sudo apt install -y openjdk-21-jdk-headless",
+      "apt install maven",
       "sudo apt install -y mysql-server",
       "sudo systemctl start mysql",
-      "sudo systemctl enable mysql"
+      "sudo systemctl enable mysql",
+      "sudo mysql -u root \"-p2001050926\" -e \"CREATE DATABASE health_check_db;\"",
+      "sudo mysql -u root \"-p2001050926\" -e \"CREATE USER 'root'@'127.0.0.1' IDENTIFIED BY '2001050926';GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1' WITH GRANT OPTION;FLUSH PRIVILEGES;\""
     ]
   }
+
+  provisioner "file" {
+      source      = "build-artifact"
+      destination = "/tmp/build-artifact"
+  }
+
+  provisioner "shell" {
+      inline = [
+        "sudo mkdir -p /opt/app",
+        "sudo mv /tmp/build-artifact/*.jar /opt/app/healthcheck.jar",
+        "sudo chown -R csye6225:csye6225 /opt/app",
+        \"cat <<EOF | sudo tee /etc/systemd/system/csye6225.service
+ [Unit]
+ Description=CSYE 6225 HealthCheck App
+ After=network.target
+
+ [Service]
+ Type=simple
+ User=csye6225
+ Group=csye6225
+ ExecStart=/usr/bin/java -jar /opt/app/healthcheck.jar
+ Restart=always
+ RestartSec=3
+ StandardOutput=syslog
+ StandardError=syslog
+ SyslogIdentifier=healthcheck
+
+ [Install]
+ WantedBy=multi-user.target
+ EOF",
+
+       "sudo systemctl daemon-reload",
+       "sudo systemctl enable healthcheck.service"
+     ]
 }
+
+post-processor "shell-local" {
+    only = ["source.googlecompute.gcp_image"]
+
+    inline = [
+      "echo 'Sharing GCP image with DEMO project...'",
+
+      # {{ artifact_id }} is the final GCP image resource, e.g.
+      #   projects/DEV_PROJECT_ID/global/images/csye6225-custom-ubuntu-24-04-....
+      # We pass that directly to gcloud
+      "gcloud compute images add-iam-policy-binding {{ artifact_id }} "
+        + "--project=${var.gcp_project_id} "
+        + "--member='projectEditor:csye6225-demo-452104' "
+        + "--role='roles/compute.imageUser'"
+    ]
+  }
+
+}
+
+

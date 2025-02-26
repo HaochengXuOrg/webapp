@@ -4,11 +4,8 @@ set -e
 DB_NAME="health_check_db"
 DB_USER="user"
 DB_PASSWORD="password"
-MYSQL_ROOT_PASSWORD="2001050926"
-LINUX_GROUP="webappgroup"
-LINUX_USER="webappuser"
-APP_DIR="/opt/csye6225"
-ZIP_FILE="webapp.zip"
+
+
 
 echo " Updating and upgrading system packages..."
 sudo apt update -y && sudo apt upgrade -y
@@ -20,7 +17,8 @@ echo "Configuring MySQL..."
 sudo systemctl start mysql
 sudo systemctl enable mysql
 
-mysql -u root "-p2001050926" -e "CREATE DATABASE health_check_db;CREATE USER 'hc_user'@'localhost' IDENTIFIED BY 'password';GRANT ALL PRIVILEGES ON health_check_db.* TO 'hc_user'@'localhost';FLUSH PRIVILEGES;EXIT;"
+mysql -u root "-p2001050926" -e "CREATE DATABASE health_check_db;"
+mysql -u root "-p2001050926" -e "CREATE USER 'root'@'127.0.0.1' IDENTIFIED BY '2001050926';GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1' WITH GRANT OPTION;FLUSH PRIVILEGES;"
 
 echo "Creating Linux group and user..."
 sudo groupadd -f ${LINUX_GROUP}
