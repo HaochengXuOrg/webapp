@@ -33,6 +33,7 @@ jobs:
       # Run `packer fmt` and fail if formatting changes are made
       - name: Run Packer Format Check
         run: |
+          cd packer
           if packer fmt -check -diff .; then
             echo "Packer format check passed."
           else
@@ -43,6 +44,7 @@ jobs:
       # Validate the Packer template
       - name: Run Packer Validate
         run: |
+          cd packer
           if packer validate .; then
             echo "Packer validation passed."
           else

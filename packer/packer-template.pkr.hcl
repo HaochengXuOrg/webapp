@@ -64,7 +64,7 @@ source "amazon-ebs" "aws_image" {
   ssh_username            = var.ssh_username
   subnet_id               = var.subnet_id
   ami_virtualization_type = "hvm"
-  ami_users               = ["354918369551"]
+  ami_users               = ["354918369551", "571600864784"]
 
   aws_polling {
     delay_seconds = 120
@@ -110,71 +110,30 @@ build {
     "source.googlecompute.gcp_image"
   ]
 
-  provisioner "shell" {
-    inline = [
-      "sudo groupadd csye6225 || true",
-      "sudo useradd -g csye6225 -s /usr/sbin/nologin csye6225 || true",
-      "sudo apt update -y",
-      "sudo apt upgrade -y",
-      "sudo apt install -y openjdk-21-jdk-headless",
-      "apt install maven",
-      "sudo apt install -y mysql-server",
-      "sudo systemctl start mysql",
-      "sudo systemctl enable mysql",
-      "sudo mysql -u root \"-p2001050926\" -e \"CREATE DATABASE health_check_db;\"",
-      "sudo mysql -u root \"-p2001050926\" -e \"CREATE USER 'root'@'127.0.0.1' IDENTIFIED BY '2001050926';GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1' WITH GRANT OPTION;FLUSH PRIVILEGES;\""
-    ]
+  provisioner "file" {
+    source      = "build-artifact/health-check.jar"
+    destination = "/tmp/build-artifact/health-check.jar"
   }
 
   provisioner "file" {
-      source      = "build-artifact"
-      destination = "/tmp/build-artifact"
+    source      = "parker/setup.sh"
+    destination = "/tmp/setup.sh"
+  }
+
+  provisioner "file" {
+    source      = "packer/healthcheck.service"
+    destination = "/tmp/healthcheck.service"
   }
 
   provisioner "shell" {
-      inline = [
-        "sudo mkdir -p /opt/app",
-        "sudo mv /tmp/build-artifact/*.jar /opt/app/healthcheck.jar",
-        "sudo chown -R csye6225:csye6225 /opt/app",
-        \"cat <<EOF | sudo tee /etc/systemd/system/csye6225.service
- [Unit]
- Description=CSYE 6225 HealthCheck App
- After=network.target
-
- [Service]
- Type=simple
- User=csye6225
- Group=csye6225
- ExecStart=/usr/bin/java -jar /opt/app/healthcheck.jar
- Restart=always
- RestartSec=3
- StandardOutput=syslog
- StandardError=syslog
- SyslogIdentifier=healthcheck
-
- [Install]
- WantedBy=multi-user.target
- EOF",
-
-       "sudo systemctl daemon-reload",
-       "sudo systemctl enable healthcheck.service"
-     ]
-}
-
-post-processor "shell-local" {
-    only = ["source.googlecompute.gcp_image"]
-
     inline = [
-      "echo 'Sharing GCP image with DEMO project...'",
-
-      # {{ artifact_id }} is the final GCP image resource, e.g.
-      #   projects/DEV_PROJECT_ID/global/images/csye6225-custom-ubuntu-24-04-....
-      # We pass that directly to gcloud
-      "gcloud compute images add-iam-policy-binding {{ artifact_id }} "
-        + "--project=${var.gcp_project_id} "
-        + "--member='projectEditor:csye6225-demo-452104' "
-        + "--role='roles/compute.imageUser'"
+      "chmod +x /tmp/setup.sh",
+      "sed -i 's/\r$//' setup.sh"
     ]
+  }
+
+  provisioner "shell" {
+    script = "/tmp/setup.sh"
   }
 
 }

@@ -59,6 +59,10 @@ jobs:
           name: healthcheck-artifact
           path: ./build-artifact
 
+      - name: Rename artifact for Packer
+        run: |
+          mv ./build-artifact/*.jar ./build-artifact/health-check.jar
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -72,42 +76,6 @@ jobs:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
           export_default_credentials: true
-
-
-      - name: Install packer
-        uses: hashicorp/setup-packer@main
-        id: setup
-        with:
-          version: "1.12.0"
-
-      - name: Step 5 - Run `packer init`
-        id: init
-        run: |
-          packer init ./packer-template.pkr.hcl
-
-      - name: Validate AWS Packer template
-        id: validate
-        run: |
-          packer validate --var-file=packer-template.pkrvars.hcl ./packer-template.pkr.hcl
-
-      - name: Build AWS Image
-        run: |
-          packer build --var-file=packer-template.pkrvars.hcl ./packer-template.pkr.hcl
-
-  # --------------------------------------------------
-  # Build in GCP
-  # --------------------------------------------------
-  packer_gcp:
-    name: Build Packer Image (GCP)
-    runs-on: ubuntu-latest
-    needs: build_and_test
-    steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: healthcheck-artifact
-          path: ./build-artifact
-
 
 
       - name: Install packer
