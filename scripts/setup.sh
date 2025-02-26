@@ -9,6 +9,7 @@ ARTIFACT_NAME="health-check.jar"
 SYSTEMD_SERVICE_NAME="healthcheck.service"
 
 echo " Updating and upgrading system packages..."
+echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections
 sudo apt-get update -y && sudo apt-get upgrade -y
 
 echo " Installing Openjdk..."
