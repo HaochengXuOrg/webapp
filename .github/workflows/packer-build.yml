@@ -105,3 +105,15 @@ jobs:
       - name: Build AWS Image
         run: |
           packer build --var-file=packer-template.pkrvars.hcl ./packer-template.pkr.hcl
+
+      - name: Extract Artifact IDs
+        run: |
+          GCP_IMAGE=$(jq -r '.builds[] | select(.name | contains("gcp_image")) | .artifact_id | split("/")[-1]' packer-manifest.json)
+          echo "GCP_IMAGE_NAME=$GCP_IMAGE" >> $GITHUB_ENV
+
+      - name: Share GCP Image
+        run: |
+            gcloud compute images add-iam-policy-binding ${{ env.GCP_IMAGE_NAME }} \
+                --project=${{ secrets.GCP_PROJECT_ID }} \
+                --member="project:target-project-id" \
+                --role="roles/compute.imageUser"
