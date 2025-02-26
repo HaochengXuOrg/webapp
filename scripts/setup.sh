@@ -7,16 +7,21 @@ LINUX_GROUP="csye6225"
 LINUX_USER="csye6225"
 ARTIFACT_NAME="health-check.jar"
 SYSTEMD_SERVICE_NAME="healthcheck.service"
+MYSQL_ROOT_PASSWORD="2001050926"
 
 echo " Updating and upgrading system packages..."
 echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections
 sudo apt-get update -y && sudo apt-get upgrade -y
 
 echo " Installing Openjdk..."
-apt apt-get install -y openjdk-21-jdk-headless
+sudo apt-get install -y openjdk-21-jdk-headless
 
 echo " Installing Maven..."
-apt apt-get install -y maven
+sudo apt-get install -y maven
+
+echo "Preconfiguring MySQL root password..."
+sudo debconf-set-selections <<< "mysql-server mysql-server/root_password password ${MYSQL_ROOT_PASSWORD}"
+sudo debconf-set-selections <<< "mysql-server mysql-server/root_password_again password ${MYSQL_ROOT_PASSWORD}"
 
 echo "Installing MySQL..."
 sudo apt-get install -y mysql-server
@@ -25,13 +30,27 @@ echo "Configuring MySQL..."
 sudo systemctl start mysql
 sudo systemctl enable mysql
 
-mysql -u root "-p2001050926" -e "CREATE DATABASE health_check_db;"
-mysql -u root "-p2001050926" -e "CREATE USER 'root'@'127.0.0.1' IDENTIFIED BY '2001050926';GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1' WITH GRANT OPTION;FLUSH PRIVILEGES;"
+# Ensure root uses password authentication
+sudo mysql -u root -p${MYSQL_ROOT_PASSWORD} <<EOF
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${MYSQL_ROOT_PASSWORD}';
+FLUSH PRIVILEGES;
+EOF
+
+mysql -u root -p${MYSQL_ROOT_PASSWORD} -e "CREATE DATABASE IF NOT EXISTS health_check_db;"
+mysql -u root -p${MYSQL_ROOT_PASSWORD} -e "CREATE USER IF NOT EXISTS 'root'@'127.0.0.1' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';"
+mysql -u root -p${MYSQL_ROOT_PASSWORD} -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1' WITH GRANT OPTION;"
+mysql -u root -p${MYSQL_ROOT_PASSWORD} -e "FLUSH PRIVILEGES;"
+#mysql -u root "-p2001050926" -e "CREATE DATABASE IF NOT EXISTS health_check_db;"
+#mysql -u root "-p2001050926" -e "CREATE USER IF NOT EXISTS 'root'@'127.0.0.1' IDENTIFIED BY '2001050926';GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1' WITH GRANT OPTION;FLUSH PRIVILEGES;"
 
 echo "Creating Linux group and user..."
-sudo groupadd -f ${LINUX_GROUP}
-sudo useradd -m -g ${LINUX_GROUP} -s /bin/bash ${LINUX_USER} || echo "User already exists"
-
+sudo groupadd -f ${LINUX_GROUP} || true
+if id "${LINUX_USER}" &>/dev/null; then
+    echo "User ${LINUX_USER} exists. Updating shell..."
+    sudo usermod -s /usr/sbin/nologin ${LINUX_USER}
+else
+    sudo useradd -r -m -g ${LINUX_GROUP} -s /usr/sbin/nologin ${LINUX_USER}
+fi
 echo "Creating application directory..."
 sudo mkdir -p ${APP_DIR}
 
