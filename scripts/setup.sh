@@ -9,16 +9,16 @@ ARTIFACT_NAME="health-check.jar"
 SYSTEMD_SERVICE_NAME="healthcheck.service"
 
 echo " Updating and upgrading system packages..."
-sudo apt update -y && sudo apt upgrade -y
+sudo apt-get update -y && sudo apt-get upgrade -y
 
 echo " Installing Openjdk..."
-apt install openjdk-21-jdk-headless
+apt apt-get install -y openjdk-21-jdk-headless
 
 echo " Installing Maven..."
-apt install maven
+apt apt-get install -y maven
 
 echo "Installing MySQL..."
-sudo apt install -y mysql-server
+sudo apt-get install -y mysql-server
 
 echo "Configuring MySQL..."
 sudo systemctl start mysql
