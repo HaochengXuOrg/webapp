@@ -6,6 +6,7 @@ After=network.target
 Type=simple
 User=csye6225
 Group=csye6225
+WorkingDirectory=/opt/csye6225
 ExecStart=/usr/bin/java -jar /opt/csye6225/health-check.jar
 Restart=on-failure
 

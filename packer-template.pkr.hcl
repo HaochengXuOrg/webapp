@@ -104,15 +104,16 @@ source "googlecompute" "gcp_image" {
 
 # Provisioners
 build {
-  name = var.ami_name
+  name = "csye-ubuntu-image"
   sources = [
     "source.amazon-ebs.aws_image",
     "source.googlecompute.gcp_image"
   ]
 
   provisioner "file" {
-    source      = "build-artifact/health-check.jar"
-    destination = "/tmp/build-artifact/health-check.jar"
+    source = "build-artifact/health-check.jar"
+    #source      = "health-check/target/health-check-0.0.1-SNAPSHOT.jar"
+    destination = "/tmp/health-check.jar"
   }
 
   provisioner "file" {
