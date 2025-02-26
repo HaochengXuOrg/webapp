@@ -28,7 +28,8 @@ jobs:
 
       # Initialize Pakcer
       - name: Initialize Packer
-        run: packer init .
+        run: |
+          packer init .
 
       # Run `packer fmt` and fail if formatting changes are made
       - name: Run Packer Format Check

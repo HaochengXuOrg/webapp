@@ -1,0 +1,13 @@
+[Unit]
+Description=Healthcheck Service
+After=network.target
+
+[Service]
+Type=simple
+User=csye6225
+Group=csye6225
+ExecStart=/usr/bin/java -jar /opt/csye6225/health-check.jar
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

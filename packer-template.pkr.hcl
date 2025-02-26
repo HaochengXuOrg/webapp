@@ -64,7 +64,7 @@ source "amazon-ebs" "aws_image" {
   ssh_username            = var.ssh_username
   subnet_id               = var.subnet_id
   ami_virtualization_type = "hvm"
-  ami_users               = ["354918369551"]
+  ami_users               = ["354918369551", "571600864784"]
 
   aws_polling {
     delay_seconds = 120
@@ -82,7 +82,7 @@ source "amazon-ebs" "aws_image" {
 # GCP Builder
 source "googlecompute" "gcp_image" {
   project_id   = var.gcp_project_id
-  source_image = "projects/csye6225-dev-452002/global/machineImages/my-machine-image"
+  source_image = "ubuntu-2404-noble-amd64-v20250214"
   zone         = var.gcp_zone
   machine_type = var.gcp_machine_type
 
@@ -110,13 +110,29 @@ build {
     "source.googlecompute.gcp_image"
   ]
 
+  provisioner "file" {
+    source      = "build-artifact/health-check.jar"
+    destination = "/tmp/build-artifact/health-check.jar"
+  }
+
+  provisioner "file" {
+    source      = "scripts/setup.sh"
+    destination = "/tmp/setup.sh"
+  }
+
+  provisioner "file" {
+    source      = "scripts/healthcheck.service"
+    destination = "/tmp/healthcheck.service"
+  }
+
   provisioner "shell" {
     inline = [
-      "sudo apt update -y",
-      "sudo apt upgrade -y",
-      "sudo apt install -y mysql-server",
-      "sudo systemctl start mysql",
-      "sudo systemctl enable mysql"
+      "chmod +x /tmp/setup.sh",
+      "sed -i 's/\r$//' /tmp/setup.sh",
+      "/tmp/setup.sh"
     ]
   }
+
 }
+
+
