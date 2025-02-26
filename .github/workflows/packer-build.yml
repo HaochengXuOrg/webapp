@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    types: [closed]
+    branches:
+      - main
 
 jobs:
   build_and_test:
@@ -41,7 +45,7 @@ jobs:
           # You might have a .jar or .war in ./health-check/target
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: healthcheck-artifact
           path: |
@@ -54,7 +58,7 @@ jobs:
     needs: build_and_test
     steps:
       - name: Download build artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: healthcheck-artifact
           path: ./build-artifact
@@ -64,14 +68,14 @@ jobs:
           mv ./build-artifact/*.jar ./build-artifact/health-check.jar
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
       - name: Set up gcloud
-        uses: google-github-actions/setup-gcloud@v1
+        uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
