@@ -111,7 +111,7 @@ build {
   ]
 
   provisioner "file" {
-    source      = "build-artifact/health-check.jar"
+    source = "build-artifact/health-check.jar"
     #source      = "health-check/target/health-check-0.0.1-SNAPSHOT.jar"
     destination = "/tmp/health-check.jar"
   }
