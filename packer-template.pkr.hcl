@@ -116,24 +116,21 @@ build {
   }
 
   provisioner "file" {
-    source      = "parker/setup.sh"
+    source      = "scripts/setup.sh"
     destination = "/tmp/setup.sh"
   }
 
   provisioner "file" {
-    source      = "packer/healthcheck.service"
+    source      = "scripts/healthcheck.service"
     destination = "/tmp/healthcheck.service"
   }
 
   provisioner "shell" {
     inline = [
       "chmod +x /tmp/setup.sh",
-      "sed -i 's/\r$//' setup.sh"
+      "sed -i 's/\r$//' /tmp/setup.sh",
+      "/tmp/setup.sh"
     ]
-  }
-
-  provisioner "shell" {
-    script = "/tmp/setup.sh"
   }
 
 }
