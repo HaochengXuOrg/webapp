@@ -36,12 +36,16 @@ jobs:
         run: |
           mvn clean test
 
-      #- name: Upload build artifact
-        #uses: actions/upload-artifact@v4
-        #with:
-          #name: healthcheck-artifact
-          #path: |
-            #./health-check/target/*.jar
+      - name: Build artifact
+        run: |
+          mvn -f ./health-check clean package
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: healthcheck-artifact
+          path: |
+            ./health-check/target/*.jar
 
 
   packer_aws:
@@ -50,20 +54,23 @@ jobs:
     runs-on: ubuntu-latest
     needs: build_and_test
     steps:
-
-      - name: Build artifact
+      - name: Make build-artifact dir
         run: |
-          mvn -f ./health-check clean package
+          mkdir build-artifact/
         
-      #- name: Download build artifact
-        #uses: actions/download-artifact@v4
-        #with:
-          #name: healthcheck-artifact
-          #path: ./build-artifact
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: healthcheck-artifact
+          path: ./build-artifact
 
-      #- name: Rename artifact for Packer
-        #run: |
-          #mv ./build-artifact/*.jar ./build-artifact/health-check.jar
+      - name: Verify downloaded artifact
+        run: |
+          ls -R ./build-artifact/
+
+      - name: Rename artifact for Packer
+        run: |
+          mv ./build-artifact/*.jar ./build-artifact/health-check.jar
 
       - name: Install packer
         uses: hashicorp/setup-packer@main
