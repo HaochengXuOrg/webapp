@@ -110,11 +110,6 @@ build {
     "source.googlecompute.gcp_image"
   ]
 
-  variable "artifact_path" {
-    type    = string
-    default = "build-artifact/health-check.jar"
-  }
-
   provisioner "file" {
     source = "build-artifact/health-check.jar"
     #source      = "health-check/target/health-check-0.0.1-SNAPSHOT.jar"
