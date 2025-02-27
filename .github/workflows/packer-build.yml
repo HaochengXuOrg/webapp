@@ -54,12 +54,19 @@ jobs:
     runs-on: ubuntu-latest
     needs: build_and_test
     steps:
+      - name: Make build-artifact dir
+        run: |
+          mkdir build-artifact/
         
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
           name: healthcheck-artifact
           path: ./build-artifact
+
+      - name: Verify downloaded artifact
+        run: |
+          ls -R ./build-artifact/
 
       - name: Rename artifact for Packer
         run: |
