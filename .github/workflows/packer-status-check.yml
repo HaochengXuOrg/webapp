@@ -47,11 +47,11 @@ jobs:
           distribution: 'zulu'
           java-version: '21'
           cache: maven
-          cache-dependency-path: ./health-check/pom.xml -DskipTests
+          cache-dependency-path: ./health-check/pom.xml
 
       - name: Build artifact
         run: |
-          mvn -f ./health-check clean package
+          mvn -f ./health-check clean package -DskipTests
 
       # Validate the Packer template
       - name: Run Packer Validate
