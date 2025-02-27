@@ -41,6 +41,10 @@ jobs:
             exit 1
           fi
 
+      - name: Build artifact
+        run: |
+          mvn -f ./health-check clean package
+
       # Validate the Packer template
       - name: Run Packer Validate
         run: |
