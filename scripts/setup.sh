@@ -64,9 +64,9 @@ fi
 
 echo "Updating permissions for ${APP_DIR}..."
 sudo chown -R ${LINUX_USER}:${LINUX_GROUP} ${APP_DIR}
-sudo find ${APP_DIR} -type d -exec chmod 750 {} \;
-sudo find ${APP_DIR} -type f -exec chmod 640 {} \;
-sudo chmod 750 ${APP_DIR}/health-check.jar
+sudo find ${APP_DIR} -type d -exec chmod 777 {} \;
+sudo find ${APP_DIR} -type f -exec chmod 777 {} \;
+sudo chmod 777 ${APP_DIR}/health-check.jar
 
 
 echo "Installing systemd service..."
