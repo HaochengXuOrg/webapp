@@ -52,6 +52,7 @@ jobs:
       - name: Build artifact
         run: |
           mvn -f ./health-check clean package -DskipTests
+          mv ./health-check/target/*.jar ./build-artifact/health-check.jar
 
       # Validate the Packer template
       - name: Run Packer Validate
