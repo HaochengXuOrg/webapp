@@ -76,7 +76,7 @@ source "amazon-ebs" "aws_image" {
     device_name           = "/dev/xvda"
     volume_size           = 8
     volume_type           = "gp2"
-  }
+                }
 }
 
 # GCP Builder
