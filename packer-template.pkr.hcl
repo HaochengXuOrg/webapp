@@ -64,7 +64,7 @@ source "amazon-ebs" "aws_image" {
   ssh_username            = var.ssh_username
   subnet_id               = var.subnet_id
   ami_virtualization_type = "hvm"
-  ami_users = ["354918369551", "571600864784"]
+  ami_users               = ["354918369551", "571600864784"]
 
   aws_polling {
     delay_seconds = 120
