@@ -1,4 +1,4 @@
-# webapp
+# webapp (demo)
 
 ## Prerequisites for Building and Deploying Locally
 
