@@ -59,7 +59,7 @@ packer {
 source "amazon-ebs" "aws_image" {
   ami_name                = var.ami_name
   region                  = var.aws_region
-  instance_type           = "t2.micro"
+  instance_type           = "t2.medium"
   source_ami              = var.source_ami
   ssh_username            = var.ssh_username
   subnet_id               = var.subnet_id
@@ -111,8 +111,8 @@ build {
   ]
 
   provisioner "file" {
-    source = "build-artifact/health-check.jar"
-    #source      = "health-check/target/health-check-0.0.1-SNAPSHOT.jar"
+    #source = "build-artifact/health-check.jar"
+    source      = "health-check/target/health-check-0.0.1-SNAPSHOT.jar"
     destination = "/tmp/health-check.jar"
   }
 
