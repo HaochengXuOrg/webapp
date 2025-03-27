@@ -1,0 +1,42 @@
+{
+  "agent": {
+    "metrics_collection_interval": 60,
+    "logfile": "/var/log/amazon/amazon-cloudwatch-agent.log"
+  },
+
+  "metrics": {
+    "namespace": "health-check",
+    "metrics_collected": {
+      "cpu": {
+        "measurement": [
+          {"name": "usage_system", "rename": "CPU_System"},
+          {"name": "usage_user",   "rename": "CPU_User"}
+        ],
+        "metrics_collection_interval": 60
+      },
+      "statsd": {
+        "service_address": ":8125",
+        "metrics_collection_interval": 60,
+        "metrics_aggregation_interval": 60
+      }
+    }
+  },
+
+  "logs": {
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "/opt/csye6225/logs/health-check.log",
+            "log_group_name": "webapp-logs",
+            "log_stream_name": "{instance_id}-app-log",
+            "timestamp_format": "%b %d %H:%M:%S"
+          }
+        ]
+      }
+    }
+  }
+}
+
+
+

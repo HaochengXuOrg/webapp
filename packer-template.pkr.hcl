@@ -112,7 +112,7 @@ build {
 
   provisioner "file" {
     source = "build-artifact/health-check.jar"
-    #source     = "health-check/target/health-check-0.0.1-SNAPSHOT.jar"
+    #source      = "health-check/target/health-check-0.0.1-SNAPSHOT.jar"
     destination = "/tmp/health-check.jar"
   }
 
@@ -126,8 +126,26 @@ build {
     destination = "/tmp/healthcheck.service"
   }
 
+  provisioner "file" {
+    source      = "scripts/cloudwatch-agent.json"
+    destination = "/tmp/cloudwatch-agent.json"
+  }
+
   provisioner "shell" {
     inline = [
+      "sudo apt-get update -y",
+      "sudo apt-get upgrade -y",
+
+      "curl -O https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb",
+      "sudo dpkg -i -E ./amazon-cloudwatch-agent.deb",
+
+      "sudo mkdir -p /opt/aws/amazon-cloudwatch-agent/etc/",
+      "sudo mv /tmp/cloudwatch-agent.json /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json",
+
+      "sudo systemctl enable amazon-cloudwatch-agent.service",
+
+      "sudo systemctl start amazon-cloudwatch-agent.service",
+
       "chmod +x /tmp/setup.sh",
       "sed -i 's/\r$//' /tmp/setup.sh",
       "/tmp/setup.sh"
