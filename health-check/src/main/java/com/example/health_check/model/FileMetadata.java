@@ -1,6 +1,8 @@
 package com.example.health_check.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -8,8 +10,10 @@ import java.time.LocalDateTime;
 public class FileMetadata {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(generator = "uuid2") // Or any name you choose
+    @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "id", updatable = false, nullable = false)
+    private String id;
 
     @Column(name = "s3_key", nullable = false, unique = true)
     private String s3Key;
@@ -30,7 +34,7 @@ public class FileMetadata {
     }
 
     public FileMetadata(String s3Key, String fileName, String contentType, long sizeBytes) {
-        this.s3Key = s3Key;
+        //this.s3Key = s3Key;
         this.fileName = fileName;
         this.contentType = contentType;
         this.sizeBytes = sizeBytes;
@@ -39,7 +43,7 @@ public class FileMetadata {
 
     // ---------------------- Getter / Setter ---------------------- //
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
