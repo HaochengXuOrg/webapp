@@ -3,7 +3,7 @@ name: Packer Continuous Integration
 on:
   push:
     branches:
-      - main
+      - demo
 
 jobs:
   build_and_test:
