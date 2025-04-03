@@ -34,44 +34,37 @@ public class FileService {
 
     public FileMetadata uploadFile(MultipartFile file) throws IOException {
 
-        long dbStart1 = System.currentTimeMillis();
+        long startDb = System.currentTimeMillis();
+
+        // First generate UUID for S3 key and DB primary key
+        String id = UUID.randomUUID().toString();
+        String s3Key = id + "/" + file.getOriginalFilename();
 
         FileMetadata metadata = new FileMetadata();
         metadata.setFileName(file.getOriginalFilename());
         metadata.setContentType(file.getContentType());
         metadata.setSizeBytes(file.getSize());
         metadata.setUploadTime(java.time.LocalDateTime.now());
-        metadata.setS3Key("placeholder");
+        metadata.setS3Key(s3Key);
 
         FileMetadata saved = fileMetadataRepository.save(metadata);
-        long dbEnd1 = System.currentTimeMillis();
-        statsd.recordExecutionTime("db.queryTime", dbEnd1 - dbStart1);
 
-        String s3Key = saved.getId() + "/" + file.getOriginalFilename();
+        long endDb = System.currentTimeMillis();
+        statsd.recordExecutionTime("db.queryTime", endDb - startDb);
 
-        logger.info("Uploading file with S3 key: {}", s3Key);
-        long s3Start = System.currentTimeMillis();
-
+        long startS3 = System.currentTimeMillis();
         s3Client.putObject(new PutObjectRequest(
                 bucketName,
                 s3Key,
                 file.getInputStream(),
                 null
         ));
+        long endS3 = System.currentTimeMillis();
+        statsd.recordExecutionTime("s3.callTime", endS3 - startS3);
 
-        long s3End = System.currentTimeMillis();
-        statsd.recordExecutionTime("s3.callTime", s3End - s3Start);
-        logger.info("S3 upload completed.");
+        logger.info("File uploaded and metadata saved. ID: {}, S3Key: {}", saved.getId(), s3Key);
 
-        saved.setS3Key(s3Key);
-
-        long dbStart2 = System.currentTimeMillis();
-        FileMetadata finalSaved = fileMetadataRepository.save(saved);
-        long dbEnd2 = System.currentTimeMillis();
-        statsd.recordExecutionTime("db.queryTime", dbEnd2 - dbStart2);
-        logger.info("Metadata updated with S3 key. Final ID: {}", finalSaved.getId());
-
-        return finalSaved;
+        return saved;
     }
 
     public Optional<FileMetadata> getFileMetadata(String id) {
